@@ -16,6 +16,7 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCourse;
     private String name;
+    
     private String code;           // exemple : CS101
     private int credit;            // nombre de crédits
     private String description;
