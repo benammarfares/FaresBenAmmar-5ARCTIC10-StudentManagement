@@ -36,11 +36,13 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
                             mvn clean verify sonar:sonar \
+                            -Dspring.profiles.active=test \
                             -Dsonar.projectKey=student-management \
                             -Dsonar.projectName='Student Management System' \
                             -Dsonar.host.url=http://localhost:9000 \
                             -Dsonar.token=${SONAR_TOKEN} \
-                            -Dsonar.java.binaries=target/classes
+                            -Dsonar.java.binaries=target/classes \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                         '''
                     }
                 }
