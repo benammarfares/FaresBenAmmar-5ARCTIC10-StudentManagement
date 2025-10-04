@@ -30,7 +30,7 @@ pipeline {
             steps {
                 echo 'Starting tests...'
                 dir('student-management') {
-                    sh 'mvn test'
+                    sh 'mvn test -Dspring.profiles.active=test'
                 }
             }
             post {
