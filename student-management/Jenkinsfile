@@ -11,24 +11,11 @@ pipeline {
             steps {
                 echo 'Starting checkout...'
                 checkout scm
-                sh 'pwd'
-                sh 'ls -la'
-                echo 'Checkout complete'
-            }
-        }
-        
-        stage('Build') {
-            steps {
-                echo 'Starting build...'
-                dir('student-management') {
-                    sh 'mvn clean package -DskipTests'
-                }
             }
         }
         
         stage('Test') {
             steps {
-                echo 'Starting tests...'
                 dir('student-management') {
                     sh 'mvn test -Dspring.profiles.active=test'
                 }
@@ -39,17 +26,37 @@ pipeline {
                 }
             }
         }
-    }
-    
-    post {
-        always {
-            echo 'Pipeline finished'
+        
+        stage('SonarQube Analysis') {
+            steps {
+                dir('student-management') {
+                    withSonarQubeEnv('SonarQube') {
+                        sh '''
+                            mvn sonar:sonar \
+                            -Dsonar.projectKey=student-management \
+                            -Dsonar.projectName='Student Management System' \
+                            -Dsonar.java.binaries=target/classes
+                        '''
+                    }
+                }
+            }
         }
-        success {
-            echo 'Pipeline succeeded!'
+        
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
         }
-        failure {
-            echo 'Pipeline failed!!'
+        
+        stage('Build and Push to Nexus') {
+            steps {
+                dir('student-management') {
+                    sh 'mvn clean package -DskipTests'
+                    sh 'mvn deploy -DskipTests'
+                }
+            }
         }
     }
 }
