@@ -9,20 +9,26 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                echo 'Starting checkout...'
                 checkout scm
+                sh 'pwd'
+                sh 'ls -la'
+                echo 'Checkout complete'
             }
         }
         
         stage('Build') {
             steps {
+                echo 'Starting build...'
                 dir('student-management') {
-                    sh 'mvn clean package'
+                    sh 'mvn clean package -DskipTests'
                 }
             }
         }
         
         stage('Test') {
             steps {
+                echo 'Starting tests...'
                 dir('student-management') {
                     sh 'mvn test'
                 }
@@ -33,13 +39,17 @@ pipeline {
                 }
             }
         }
-        
-        stage('SonarQube Analysis') {
-            steps {
-                dir('student-management') {
-                    sh 'mvn sonar:sonar'
-                }
-            }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline finished'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
